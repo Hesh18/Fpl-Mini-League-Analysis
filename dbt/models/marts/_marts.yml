@@ -1,0 +1,8 @@
+models:
+  - name: mart_league_summary
+    description: "One row per manager in the current league table, with season-long decision stats for the app."
+    columns:
+      - name: manager_id
+        data_tests:
+          - unique
+          - not_null
