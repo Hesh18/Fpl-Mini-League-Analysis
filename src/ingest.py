@@ -37,6 +37,7 @@ def snapshot_bootstrap(today):
     save_raw(data, "bootstrap", f"{today}.json.gz")
     return data
 
+
 def remove_personal_names(league_data):
     """Drop managers' real names; keep their IDs and team names."""
     for row in league_data["standings"]["results"]:
@@ -47,9 +48,7 @@ def remove_personal_names(league_data):
 def snapshot_league(league_id, today):
     """Save the league table and return the manager IDs in it."""
     data = fetch_json(f"leagues-classic/{league_id}/standings/")
-    data = fetch_json(f"leagues-classic/{league_id}/standings/")
     remove_personal_names(data)
-    save_raw(data, "league", f"{league_id}_{today}.json.gz")
     save_raw(data, "league", f"{league_id}_{today}.json.gz")
 
     standings = data["standings"]
