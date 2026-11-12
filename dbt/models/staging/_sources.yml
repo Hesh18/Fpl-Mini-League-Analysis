@@ -1,0 +1,12 @@
+sources:
+  - name: fpl_raw
+    description: "Raw FPL API snapshots, one gzip-compressed JSON file per day, from the data branch."
+    meta:
+      external_location: "read_json('{{ env_var('FPL_RAW_DIR', '../data/snapshots/raw') }}/{name}/*.json.gz', filename = true, union_by_name = true)"
+    tables:
+      - name: bootstrap
+        description: "Full game state per day: every player, team and gameweek."
+      - name: league
+        description: "The mini-league table per day. Managers' real names are removed at ingestion."
+      - name: manager_history
+        description: "Each manager's gameweek-by-gameweek history per day."

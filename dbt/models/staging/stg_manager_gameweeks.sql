@@ -4,7 +4,7 @@ WITH files AS (
         CAST(regexp_extract(filename, '(\d+)_\d{4}-\d{2}-\d{2}\.json\.gz$', 1) AS BIGINT) AS manager_id,
         CAST(regexp_extract(filename, '(\d{4}-\d{2}-\d{2})\.json\.gz$', 1) AS DATE) AS snapshot_date,
         current
-    FROM read_json('{{ raw_dir }}/manager_history/*.json.gz', filename = true, union_by_name = true)
+    FROM {{ source('fpl_raw', 'manager_history') }}
 ),
 
 gameweeks AS (

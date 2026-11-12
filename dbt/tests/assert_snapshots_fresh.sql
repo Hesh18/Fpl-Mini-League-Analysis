@@ -2,5 +2,5 @@
 SELECT
     max(snapshot_date) AS latest_snapshot,
     current_date - max(snapshot_date) AS days_old
-FROM stg_player_snapshots
+FROM {{ ref('stg_player_snapshots') }}
 HAVING coalesce(current_date - max(snapshot_date), 999) > 2

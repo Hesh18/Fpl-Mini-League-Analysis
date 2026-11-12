@@ -1,13 +1,13 @@
 -- Fails if the latest league table disagrees with a manager's own history.
 WITH league AS (
     SELECT manager_id, total_points
-    FROM stg_league_standings
-    WHERE snapshot_date = (SELECT max(snapshot_date) FROM stg_league_standings)
+    FROM {{ ref('stg_league_standings') }}
+    WHERE snapshot_date = (SELECT max(snapshot_date) FROM {{ ref('stg_league_standings') }})
 ),
 
 history AS (
     SELECT manager_id, total_points
-    FROM stg_manager_gameweeks
+    FROM {{ ref('stg_manager_gameweeks') }}
     QUALIFY row_number() OVER (PARTITION BY manager_id ORDER BY gameweek DESC) = 1
 )
 

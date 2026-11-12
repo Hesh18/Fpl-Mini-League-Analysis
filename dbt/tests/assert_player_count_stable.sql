@@ -1,7 +1,7 @@
 -- Fails if the player count changes by more than 5% from one snapshot day to the next.
 WITH daily AS (
     SELECT snapshot_date, count(*) AS players
-    FROM stg_player_snapshots
+    FROM {{ ref('stg_player_snapshots') }}
     GROUP BY snapshot_date
 ),
 

@@ -1,0 +1,51 @@
+models:
+  - name: stg_player_snapshots
+    description: "One row per player per snapshot day, with clean types and real units."
+    columns:
+      - name: snapshot_date
+        data_tests:
+          - not_null
+      - name: player_id
+        data_tests:
+          - not_null
+      - name: team_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_teams')
+                field: team_id
+      - name: position
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["GKP", "DEF", "MID", "FWD"]
+
+  - name: stg_teams
+    description: "One row per Premier League team."
+    columns:
+      - name: team_id
+        data_tests:
+          - unique
+          - not_null
+
+  - name: stg_manager_gameweeks
+    description: "One row per manager per gameweek, from the newest snapshot that has it."
+    columns:
+      - name: manager_id
+        data_tests:
+          - not_null
+      - name: gameweek
+        data_tests:
+          - not_null
+
+  - name: stg_league_standings
+    description: "The mini-league table per snapshot day. No real names."
+    columns:
+      - name: manager_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_manager_gameweeks')
+                field: manager_id
