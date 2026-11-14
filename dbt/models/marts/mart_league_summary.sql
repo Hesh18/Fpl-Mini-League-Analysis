@@ -10,9 +10,9 @@ season_totals AS (
         manager_id,
         count(*) AS gameweeks_played,
         min(gameweek) AS first_gameweek,
-        sum(points_on_bench) AS bench_points,
-        sum(transfer_cost) AS hit_points,
-        sum(transfers) AS transfers_made
+        CAST(sum(points_on_bench) AS BIGINT) AS bench_points,
+        CAST(sum(transfer_cost) AS BIGINT) AS hit_points,
+        CAST(sum(transfers) AS BIGINT) AS transfers_made
     FROM {{ ref('stg_manager_gameweeks') }}
     GROUP BY manager_id
 )
