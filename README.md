@@ -17,14 +17,14 @@ I love Fantasy Premier League. My friends and I have played every season since 2
 flowchart LR
     API["FPL API<br/>undocumented, public"] -->|daily, GitHub Actions| ING["ingest.py<br/>retries, guards,<br/>strips real names"]
     ING --> RAW[("data branch<br/>raw snapshots, gzip JSON")]
-    RAW --> STG["dbt staging<br/>4 models"]
-    STG -->|21 tests gate every step| MART["dbt mart<br/>mart_league_summary"]
+    RAW --> STG["dbt staging<br/>6 models"]
+    STG -->|33 tests gate every step| MART["dbt marts<br/>league summary,<br/>captain decisions"]
     MART -->|only if all tests pass| PUB[("data branch<br/>published Parquet")]
     PUB --> APP["Streamlit app<br/>live"]
 ```
 
 1. **Ingest:** every day a GitHub Actions workflow calls the FPL API, retries brief failures, refuses obviously broken responses, removes managers' real names, and saves gzip-compressed JSON to a separate `data` branch.
-2. **Transform and test:** `dbt build` cleans the raw JSON into staging tables and a mart, running 21 data tests along the way. A failing test stops everything downstream of it.
+2. **Transform and test:** `dbt build` cleans the raw JSON into staging tables and two marts, running 33 data tests. A failing test stops everything downstream of it.
 3. **Publish:** only when every test passes, the mart is exported as Parquet for the app. Raw data is always kept, so a bad day can be investigated and replayed.
 
 ![dbt lineage graph](docs/lineage.png)
@@ -35,12 +35,14 @@ flowchart LR
 | --- | --- |
 | `assert_manager_points_reconcile` | A manager's season total not matching the sum of their gameweeks minus transfer hits |
 | `assert_league_matches_history` | The league table disagreeing with managers' own histories |
+| `assert_picks_reconcile_to_fpl` | A manager's picks not adding up to the gameweek score FPL reports |
+| `assert_picks_complete` | A manager's gameweek missing from the picks, which would flatter their totals |
 | `assert_players_present` | An empty or broken snapshot saved as a normal day |
 | `assert_player_count_stable` | More than 5% of players appearing or disappearing overnight |
 | `assert_snapshots_fresh` | Data silently ceasing to arrive |
 | `assert_prices_in_range`, `assert_ownership_valid` | Unit and type errors (prices in tenths, numbers stored as text) |
 | Built-in `unique`, `not_null`, `accepted_values`, `relationships` | Duplicates, blanks, unknown codes, broken links between tables |
-| Model contract on `mart_league_summary` | The app's input changing column names or types |
+| Model contracts on both marts. | The app's input changing column names or types |
 
 ## Design decisions
 
@@ -64,6 +66,7 @@ dbt v2 came out in September 2026, but its own docs warn it may not handle model
 - A quarantine folder for raw files that fail tests, so one bad day doesn't keep the pipeline red until I step in
 - Incremental dbt models once the season's data gets large
 - Moving to dbt v2 once it fully supports local file sources
+- A captain decisions page in the app.
 
 ## Run it locally
 

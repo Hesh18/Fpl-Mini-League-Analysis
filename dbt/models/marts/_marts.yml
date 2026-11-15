@@ -35,3 +35,34 @@ models:
         data_type: bigint
       - name: transfers_made
         data_type: bigint
+
+  - name: mart_captain_decisions
+    description: "One row per manager per final gameweek: who wore the armband, the best option in the XI they picked, and the points the choice cost."
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: gameweek
+        data_type: bigint
+        data_tests:
+          - not_null
+      - name: manager_id
+        data_type: bigint
+        data_tests:
+          - not_null
+      - name: team_name
+        data_type: varchar
+      - name: chip
+        data_type: varchar
+      - name: captain_name
+        data_type: varchar
+      - name: captain_points
+        data_type: bigint
+      - name: vice_captain_stepped_in
+        data_type: boolean
+      - name: best_option_name
+        data_type: varchar
+      - name: best_option_points
+        data_type: bigint
+      - name: captain_points_lost
+        data_type: bigint

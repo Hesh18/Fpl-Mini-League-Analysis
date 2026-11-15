@@ -43,8 +43,10 @@ def save_raw(data, folder, filename):
     """Save data as a gzip-compressed JSON file under RAW_DIR/<folder>/<filename>."""
     path = RAW_DIR / folder / filename
     path.parent.mkdir(parents=True, exist_ok=True)
-    with gzip.open(path, "wt", encoding="utf-8") as f:
+    temp_path = path.with_name(path.name + ".tmp")
+    with gzip.open(temp_path, "wt", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False)
+    temp_path.replace(path)
     print(f"Saved {path}")
     return path
 
@@ -83,20 +85,78 @@ def snapshot_league(league_id, today):
 
 
 def snapshot_manager_histories(manager_ids, today):
-    """Save each manager's gameweek-by-gameweek history."""
+    """Save each manager's gameweek history and return the gameweeks each one played."""
+    played = {}
     for manager_id in manager_ids:
         data = fetch_json(f"entry/{manager_id}/history/")
         save_raw(data, "manager_history", f"{manager_id}_{today}.json.gz")
+        played[manager_id] = [row["event"] for row in data["current"]]
         time.sleep(1)
+    return played
+
+
+def final_gameweeks(bootstrap):
+    """Return the gameweeks whose points FPL has marked as final."""
+    return [
+        event["id"]
+        for event in bootstrap["events"]
+        if event["finished"] and event["data_checked"]
+    ]
+
+
+def save_gameweek_points(gameweek):
+    """Save every player's points for one final gameweek. Returns False if we already have it."""
+    filename = f"{gameweek}.json.gz"
+    if (RAW_DIR / "gameweek_live" / filename).exists():
+        return False
+    data = fetch_json(f"event/{gameweek}/live/")
+    players = len(data.get("elements", []))
+    if players < MIN_PLAYERS:
+        raise RuntimeError(f"Gameweek {gameweek} has only {players} players; refusing to save it.")
+    save_raw(data, "gameweek_live", filename)
+    return True
+
+
+def save_manager_picks(manager_id, gameweek):
+    """Save one manager's 15 picks for one final gameweek. Returns False if we already have it."""
+    filename = f"{manager_id}_{gameweek}.json.gz"
+    if (RAW_DIR / "manager_picks" / filename).exists():
+        return False
+    data = fetch_json(f"entry/{manager_id}/event/{gameweek}/picks/")
+    if len(data.get("picks", [])) != 15:
+        raise RuntimeError(f"Manager {manager_id} gameweek {gameweek} doesn't have 15 picks; refusing to save it.")
+    save_raw(data, "manager_picks", filename)
+    return True
+
+
+def backfill_final_gameweeks(bootstrap, played):
+    """Download picks and player points for final gameweeks we don't have yet."""
+    final = set(final_gameweeks(bootstrap))
+    downloaded = 0
+
+    for gameweek in sorted(final):
+        if save_gameweek_points(gameweek):
+            downloaded += 1
+            time.sleep(1)
+
+    for manager_id, gameweeks in played.items():
+        for gameweek in gameweeks:
+            if gameweek in final and save_manager_picks(manager_id, gameweek):
+                downloaded += 1
+                time.sleep(1)
+
+    print(f"Final gameweeks: {len(final)}. New files downloaded: {downloaded}")
 
 
 def main():
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     print(f"Snapshot date (UTC): {today}")
     failures = 0
+    bootstrap = None
+    played = None
 
     try:
-        snapshot_bootstrap(today)
+        bootstrap = snapshot_bootstrap(today)
     except Exception:
         failures += 1
         print("FAILED: bootstrap")
@@ -105,11 +165,21 @@ def main():
     try:
         manager_ids = snapshot_league(LEAGUE_ID, today)
         print(f"Found {len(manager_ids)} managers")
-        snapshot_manager_histories(manager_ids, today)
+        played = snapshot_manager_histories(manager_ids, today)
     except Exception:
         failures += 1
         print("FAILED: league or manager histories")
         traceback.print_exc()
+
+    if bootstrap is None or played is None:
+        print("SKIPPED: picks and player points (they need both parts above)")
+    else:
+        try:
+            backfill_final_gameweeks(bootstrap, played)
+        except Exception:
+            failures += 1
+            print("FAILED: picks or player points")
+            traceback.print_exc()
 
     if failures:
         sys.exit(f"{failures} part(s) failed. Saved what succeeded.")
