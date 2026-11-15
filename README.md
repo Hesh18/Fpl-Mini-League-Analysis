@@ -6,7 +6,7 @@ An automated, tested data pipeline that snapshots the Fantasy Premier League API
 
 ## Why I built this
 
-I love fantasy premier league me and my friends have been playing every season since 2015-2016. we've been using 3rd party apps for the longest time and I got the idea of why not trying to build my own project that we can use. I've wanted to learn how to connect to API's, setup my own psuedo server, and create multiple pipelines / flows and connect them all together to create both a benefiecal app and a fun one at the same time.
+2024-2025 I was placed in the top 1% of FPL players worldwide. I love fantasy premier league me and my friends have been playing every season since 2015-2016. we've been using 3rd party apps for the longest time and I got the idea of why not trying to build my own project that we can use. I've wanted to learn how to connect to API's, setup my own psuedo server, and create multiple pipelines / flows and connect them all together to create both a benefiecal app and a fun one at the same time.
 
 ## How it works
 
@@ -80,3 +80,4 @@ dbt build
 ## Stack
 
 Python 3.14 · requests · DuckDB · dbt Core 1.12 with dbt-duckdb · GitHub Actions · Parquet
+
