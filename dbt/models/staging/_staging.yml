@@ -49,3 +49,30 @@ models:
               arguments:
                 to: ref('stg_manager_gameweeks')
                 field: manager_id
+  - name: stg_manager_picks
+    description: "One row per manager, gameweek and squad player. picked_to_start is the XI at the deadline, before auto-subs."
+    columns:
+      - name: manager_id
+        data_tests:
+          - not_null
+      - name: gameweek
+        data_tests:
+          - not_null
+      - name: player_id
+        data_tests:
+          - not_null
+      - name: chip
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["3xc", "bboost", "freehit", "wildcard"]
+
+  - name: stg_gameweek_player_points
+    description: "One row per player per final gameweek: minutes and FPL points."
+    columns:
+      - name: gameweek
+        data_tests:
+          - not_null
+      - name: player_id
+        data_tests:
+          - not_null

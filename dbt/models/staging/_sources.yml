@@ -10,3 +10,7 @@ sources:
         description: "The mini-league table per day. Managers' real names are removed at ingestion."
       - name: manager_history
         description: "Each manager's gameweek-by-gameweek history per day."
+      - name: manager_picks
+        description: "Each manager's 15 picks for one final gameweek. Downloaded once; no personal names."
+      - name: gameweek_live
+        description: "Every player's points for one final gameweek. Downloaded once."

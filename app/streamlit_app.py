@@ -120,6 +120,6 @@ st.bar_chart(
 
 st.divider()
 st.caption(
-    f"Data is downloaded from the FPL API every day, checked by 26 automated tests, "
+    f"Data is downloaded from the FPL API every day, checked by automated tests, "
     f"and only published here when every test passes. [How it works]({REPO_URL})"
 )
