@@ -6,8 +6,7 @@ An automated, tested data pipeline that snapshots the Fantasy Premier League API
 
 ## Why I built this
 
-2024-2025 I was placed in the top 1% of FPL players worldwide. I love fantasy premier league me and my friends have been playing every season since 2015-2016. we've been using 3rd party apps for the longest time and I got the idea of why not trying to build my own project that we can use. I've wanted to learn how to connect to API's, setup my own psuedo server, and create multiple pipelines / flows and connect them all together to create both a benefiecal app and a fun one at the same time.
-
+I love Fantasy Premier League. My friends and I have played every season since 2015/16, and I finished in the top 1% in 2024/25. We've always relied on third-party apps, so I decided to build our own. I wanted to learn how to connect to APIs, run an automated pipeline on free infrastructure, and link several pipelines and tools together into an app that's both useful and fun for my league.
 ## How it works
 
 ```mermaid
