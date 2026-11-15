@@ -1,8 +1,32 @@
 models:
   - name: mart_league_summary
     description: "One row per manager in the current league table, with season-long decision stats for the app."
+    config:
+      contract:
+        enforced: true
     columns:
+      - name: league_rank
+        data_type: bigint
       - name: manager_id
+        data_type: bigint
         data_tests:
           - unique
           - not_null
+      - name: team_name
+        data_type: varchar
+      - name: total_points
+        data_type: bigint
+      - name: points_behind_leader
+        data_type: bigint
+      - name: gameweeks_played
+        data_type: bigint
+      - name: first_gameweek
+        data_type: bigint
+      - name: bench_points
+        data_type: bigint
+      - name: bench_points_per_gameweek
+        data_type: double
+      - name: hit_points
+        data_type: bigint
+      - name: transfers_made
+        data_type: bigint
