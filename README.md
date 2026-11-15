@@ -37,6 +37,7 @@ flowchart LR
 | `assert_league_matches_history` | The league table disagreeing with managers' own histories |
 | `assert_picks_reconcile_to_fpl` | A manager's picks not adding up to the gameweek score FPL reports |
 | `assert_picks_complete` | A manager's gameweek missing from the picks, which would flatter their totals |
+| `assert_picks_shape` | A squad that isn't 15 players, 11 starters and one captain |
 | `assert_players_present` | An empty or broken snapshot saved as a normal day |
 | `assert_player_count_stable` | More than 5% of players appearing or disappearing overnight |
 | `assert_snapshots_fresh` | Data silently ceasing to arrive |
