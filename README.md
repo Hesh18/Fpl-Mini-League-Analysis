@@ -4,6 +4,10 @@
 
 An automated, tested data pipeline that snapshots the Fantasy Premier League API every day and turns it into decision analytics for a 15-person mini-league: who loses the most points on the bench, who takes the most transfer hits, and how far each manager is from first place. Runs entirely on free infrastructure.
 
+**Live app:** https://fpl-mini-league-hesham.streamlit.app/
+
+![The league app](docs/app.png)
+
 ## Why I built this
 
 I love Fantasy Premier League. My friends and I have played every season since 2015/16, and I finished in the top 1% in 2024/25. We've always relied on third-party apps, so I decided to build our own. I wanted to learn how to connect to APIs, run an automated pipeline on free infrastructure, and link several pipelines and tools together into an app that's both useful and fun for my league.
@@ -16,7 +20,7 @@ flowchart LR
     RAW --> STG["dbt staging<br/>4 models"]
     STG -->|21 tests gate every step| MART["dbt mart<br/>mart_league_summary"]
     MART -->|only if all tests pass| PUB[("data branch<br/>published Parquet")]
-    PUB --> APP["Streamlit app<br/>coming next"]
+    PUB --> APP["Streamlit app<br/>live"]
 ```
 
 1. **Ingest:** every day a GitHub Actions workflow calls the FPL API, retries brief failures, refuses obviously broken responses, removes managers' real names, and saves gzip-compressed JSON to a separate `data` branch.
@@ -56,10 +60,8 @@ Each day's prices only exist on that day, so I never want to lose real data, but
 dbt v2 came out in September 2026, but its own docs warn it may not handle models that read local JSON files with `read_json()`, which is exactly what mine do, and its DuckDB support is still catching up. For a job that runs unattended every day, I chose the stable version: dbt Core 1.12 works with DuckDB, my JSON sources and Python 3.14.
 
 ## What's next
-- A Streamlit app for the league, reading the published Parquet file
 - A test that fails if a real name ever appears in a raw league file
 - A quarantine folder for raw files that fail tests, so one bad day doesn't keep the pipeline red until I step in
-- A "last updated" date in the app
 - Incremental dbt models once the season's data gets large
 - Moving to dbt v2 once it fully supports local file sources
 
