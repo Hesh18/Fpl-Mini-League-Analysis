@@ -5,6 +5,11 @@ models:
       contract:
         enforced: true
     columns:
+    
+      - name: as_of_date
+        data_type: date
+      - name: latest_gameweek
+        data_type: bigint
       - name: league_rank
         data_type: bigint
       - name: manager_id
