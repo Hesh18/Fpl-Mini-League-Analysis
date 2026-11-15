@@ -20,11 +20,18 @@ season_totals AS (
 current_gameweek AS (
     SELECT max(gameweek) AS latest_gameweek
     FROM {{ ref('stg_manager_gameweeks') }}
+),
+
+gameweek_status AS (
+    SELECT c.latest_gameweek, g.is_final AS latest_gameweek_final
+    FROM current_gameweek AS c
+    LEFT JOIN {{ ref('stg_gameweeks') }} AS g ON g.gameweek = c.latest_gameweek
 )
 
 SELECT
     s.snapshot_date AS as_of_date,
     c.latest_gameweek,
+    c.latest_gameweek_final,
     s.league_rank,
     s.manager_id,
     s.team_name,
@@ -38,4 +45,4 @@ SELECT
     t.transfers_made
 FROM latest_standings AS s
 JOIN season_totals AS t ON t.manager_id = s.manager_id
-CROSS JOIN current_gameweek AS c
+CROSS JOIN gameweek_status AS c

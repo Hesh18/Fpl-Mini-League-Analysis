@@ -76,3 +76,14 @@ models:
       - name: player_id
         data_tests:
           - not_null
+
+  - name: stg_gameweeks
+    description: "One row per gameweek from the newest snapshot: whether its points are final, and the game's most-captained player."
+    columns:
+      - name: gameweek
+        data_tests:
+          - unique
+          - not_null
+      - name: is_final
+        data_tests:
+          - not_null

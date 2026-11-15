@@ -10,6 +10,10 @@ models:
         data_type: date
       - name: latest_gameweek
         data_type: bigint
+      - name: latest_gameweek_final
+        data_type: boolean
+        data_tests:
+          - not_null
       - name: league_rank
         data_type: bigint
       - name: manager_id
@@ -54,6 +58,14 @@ models:
         data_type: varchar
       - name: chip
         data_type: varchar
+      - name: picked_captain_name
+        data_type: varchar
+        data_tests:
+          - not_null
+      - name: changed_captain
+        data_type: boolean
+        data_tests:
+          - not_null
       - name: captain_name
         data_type: varchar
       - name: captain_points
@@ -66,3 +78,11 @@ models:
         data_type: bigint
       - name: captain_points_lost
         data_type: bigint
+      - name: crowd_captain_name
+        data_type: varchar
+        data_tests:
+          - not_null
+      - name: crowd_captain_points
+        data_type: bigint
+        data_tests:
+          - not_null
