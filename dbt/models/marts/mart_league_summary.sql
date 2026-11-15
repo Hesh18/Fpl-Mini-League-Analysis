@@ -15,9 +15,16 @@ season_totals AS (
         CAST(sum(transfers) AS BIGINT) AS transfers_made
     FROM {{ ref('stg_manager_gameweeks') }}
     GROUP BY manager_id
+),
+
+current_gameweek AS (
+    SELECT max(gameweek) AS latest_gameweek
+    FROM {{ ref('stg_manager_gameweeks') }}
 )
 
 SELECT
+    s.snapshot_date AS as_of_date,
+    c.latest_gameweek,
     s.league_rank,
     s.manager_id,
     s.team_name,
@@ -31,3 +38,4 @@ SELECT
     t.transfers_made
 FROM latest_standings AS s
 JOIN season_totals AS t ON t.manager_id = s.manager_id
+CROSS JOIN current_gameweek AS c
