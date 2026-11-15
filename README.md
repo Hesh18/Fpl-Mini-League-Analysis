@@ -17,14 +17,14 @@ I love Fantasy Premier League. My friends and I have played every season since 2
 flowchart LR
     API["FPL API<br/>undocumented, public"] -->|daily, GitHub Actions| ING["ingest.py<br/>retries, guards,<br/>strips real names"]
     ING --> RAW[("data branch<br/>raw snapshots, gzip JSON")]
-    RAW --> STG["dbt staging<br/>6 models"]
-    STG -->|33 tests gate every step| MART["dbt marts<br/>league summary,<br/>captain decisions"]
+    RAW --> STG["dbt staging<br/>7 models"]
+    STG -->|42 tests gate every step| MART["dbt marts<br/>league summary,<br/>captain decisions"]
     MART -->|only if all tests pass| PUB[("data branch<br/>published Parquet")]
     PUB --> APP["Streamlit app<br/>live"]
 ```
 
 1. **Ingest:** every day a GitHub Actions workflow calls the FPL API, retries brief failures, refuses obviously broken responses, removes managers' real names, and saves gzip-compressed JSON to a separate `data` branch.
-2. **Transform and test:** `dbt build` cleans the raw JSON into staging tables and two marts, running 33 data tests. A failing test stops everything downstream of it.
+2. **Transform and test:** `dbt build` cleans the raw JSON into staging tables and two marts, running 42 data tests. A failing test stops everything downstream of it.
 3. **Publish:** only when every test passes, the mart is exported as Parquet for the app. Raw data is always kept, so a bad day can be investigated and replayed.
 
 ![dbt lineage graph](docs/lineage.png)
@@ -38,6 +38,7 @@ flowchart LR
 | `assert_picks_reconcile_to_fpl` | A manager's picks not adding up to the gameweek score FPL reports |
 | `assert_picks_complete` | A manager's gameweek missing from the picks, which would flatter their totals |
 | `assert_picks_shape` | A squad that isn't 15 players, 11 starters and one captain |
+| `assert_final_gameweeks_loaded` | FPL marking a gameweek final while its player points were never downloaded |
 | `assert_players_present` | An empty or broken snapshot saved as a normal day |
 | `assert_player_count_stable` | More than 5% of players appearing or disappearing overnight |
 | `assert_snapshots_fresh` | Data silently ceasing to arrive |
