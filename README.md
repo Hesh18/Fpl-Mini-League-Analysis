@@ -2,7 +2,7 @@
 
 ![Daily snapshot](https://github.com/Hesh18/Fpl-Mini-League-Analysis/actions/workflows/daily-snapshot.yml/badge.svg)
 
-An automated, tested data pipeline that snapshots the Fantasy Premier League API every day and turns it into a league dashboard for a 15-person mini-league: who loses the most points on the bench, who takes the most transfer hits, comparions of captain picks in mini league and full game wide, including a full captain pick comparison for previous GWs, and how far each manager is from first place. Runs entirely on free infrastructure.
+An automated, tested data pipeline that snapshots the Fantasy Premier League API every day and turns it into a league dashboard for a 15-person mini-league: who loses the most points on the bench, who takes the most transfer hits, whose captain picks cost them the most, and how far each manager is from first place. Runs entirely on free infrastructure.
 
 **Example finding (through gameweek 10):** Number One sits 26 points off first place but has lost 73 points to captain picks, 34 more than the league's best captain picker (39).
 
@@ -20,7 +20,7 @@ An automated, tested data pipeline that snapshots the Fantasy Premier League API
 
 ## Why I built this
 
-I love Fantasy Premier League. My friends and I have played every season since 2015/16, and I finished in the top 1% in 2024/25. We've always relied on third-party apps, so I decided to build our own. I wanted to learn how to connect to APIs, run an automated pipeline on free infrastructure, and connect several tools into one pipeline and an app that’s both useful and fun for my league
+I love Fantasy Premier League. My friends and I have played every season since 2015/16, and I finished in the top 1% in 2024/25. We've always relied on third-party apps, so I decided to build our own. I wanted to learn how to connect to APIs, run an automated pipeline on free infrastructure, and connect several tools into one pipeline and an app that’s both useful and fun for my league.
 
 ## How it works
 
@@ -77,7 +77,7 @@ dbt v2 came out in September 2026, but its own docs warn it may not handle model
 ### 6. Captain picks are judged against the players the manager actually started
 
 FPL's data shows each team after automatic substitutions, so a bench player who came on looks like a starter. If I compared the captain with the best player in that final eleven, I'd sometimes blame a manager for not captaining someone they had left on the bench. So the model rebuilds the eleven each manager picked before the deadline and compares the captain only with those players. It changed 3 of 145 captain picks, 11 points in total. In gameweek 5, Pascal Gross came off H-Awy FC's bench and scored 14, more than
-the captain, so the simple method said 8 points were lost when the real answer is 0 The number is still hindsight: nobody knows who will score most before the games, so it shows how a pick turned out, not whether it was a bad decision.
+the captain. So the simple method said 8 points were lost when the real answer is 0. The number is still hindsight: nobody knows who will score most before the games, so it shows how a pick turned out, not whether it was a bad decision.
 
 ## What's next
 - A test that fails if a real name ever appears in a raw league file
