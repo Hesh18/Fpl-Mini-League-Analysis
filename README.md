@@ -18,6 +18,10 @@ An automated, tested data pipeline that snapshots the Fantasy Premier League API
 
 ![The Captaincy tab](docs/captaincy.png)
 
+**Top half tab:** how often each manager finished in the top half of the league, and their longest run of top-half weeks.
+
+![The Top half tab](docs/top_half.png)
+
 ## Why I built this
 
 I love Fantasy Premier League. My friends and I have played every season since 2015/16, and I finished in the top 1% in 2024/25. We've always relied on third-party apps, so I decided to build our own. I wanted to learn how to connect to APIs, run an automated pipeline on free infrastructure, and connect several tools into one pipeline and an app that’s both useful and fun for my league.
@@ -80,6 +84,10 @@ dbt v2 came out in September 2026, but its own docs warn it may not handle model
 
 FPL's data shows each team after automatic substitutions, so a bench player who came on looks like a starter. If I compared the captain with the best player in that final eleven, I'd sometimes blame a manager for not captaining someone they had left on the bench. So the model rebuilds the eleven each manager picked before the deadline and compares the captain only with those players. It changed 3 of 145 captain picks, 11 points in total. In gameweek 5, Pascal Gross came off H-Awy FC's bench and scored 14, more than
 the captain. So the simple method said 8 points were lost when the real answer is 0. The number is still hindsight: nobody knows who will score most before the games, so it shows how a pick turned out, not whether it was a bad decision.
+
+### 7. Finished gameweeks are downloaded once
+
+Player prices change every day, so I save them every day. A finished gameweek's picks and points never change, so downloading them again daily would waste around 150 API calls a day, and more each week, on data I already have. Instead, the pipeline downloads each manager's picks once, as soon as FPL marks the gameweek final, and skips any file it already has. A normal day makes no extra calls, and if a run fails halfway it picks up where it stopped next time. The weakness: if FPL corrects a score after marking the gameweek final, my saved file is out of date. The reconciliation test would catch it and stop anything being published, and the fix is to delete that file so it downloads again.
 
 ## What's next
 - A test that fails if a real name ever appears in a raw league file
