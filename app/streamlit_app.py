@@ -24,6 +24,7 @@ def load_table(name):
 try:
     summary = load_table("mart_league_summary").sort_values("league_rank")
     captain = load_table("mart_captain_decisions")
+    top_half = load_table("mart_top_half_weeks")
 except Exception:
     st.error("Couldn't load the league data right now. Try again in a few minutes.")
     st.stop()
@@ -38,7 +39,7 @@ if gameweek_final:
 else:
     st.caption(f"Gameweek {gameweek} in progress, points so far · data as of {as_of:%d %b %Y} · updates daily")
 
-league_tab, captain_tab = st.tabs(["League", "Captaincy"])
+league_tab, captain_tab, top_half_tab = st.tabs(["League", "Captaincy", "Top half"])
 
 with league_tab:
     leader = summary.iloc[0]
@@ -288,6 +289,37 @@ with captain_tab:
             "crowd_captain_name": st.column_config.TextColumn("Crowd's captain"),
             "crowd_captain_points": st.column_config.NumberColumn("Crowd pts"),
         },
+    )
+
+with top_half_tab:
+    st.caption(
+        f"Finished gameweeks only: 1 to {captain['gameweek'].max()}. "
+        "A top-half week means you outscored more than half of the league that week, after transfer hits."
+    )
+    if not gameweek_final:
+        st.info(f"Gameweek {gameweek} is still being played. It appears here once FPL confirms the final points.")
+
+    top_half = top_half.sort_values(["top_half_share", "longest_run"], ascending=False)
+    top_half["record"] = top_half["top_half_weeks"].astype(str) + " of " + top_half["gameweeks_played"].astype(str)
+    top_half["share_pct"] = (100 * top_half["top_half_share"]).round(0)
+
+    st.dataframe(
+        top_half,
+        hide_index=True,
+        width="stretch",
+        height="content",
+        column_order=["team_name", "record", "share_pct", "longest_run", "current_run"],
+        column_config={
+            "team_name": st.column_config.TextColumn("Team"),
+            "record": st.column_config.TextColumn("Top-half weeks"),
+            "share_pct": st.column_config.NumberColumn("Share", format="%d%%"),
+            "longest_run": st.column_config.NumberColumn("Longest run"),
+            "current_run": st.column_config.NumberColumn("Current run"),
+        },
+    )
+    st.caption(
+        "Counted out of the weeks each manager has played, so late joiners aren't marked down. "
+        "A run is top-half weeks in a row; the current run is the one still going."
     )
 
 st.divider()
