@@ -35,7 +35,7 @@ flowchart LR
 ```
 
 1. **Ingest:** every day a GitHub Actions workflow calls the FPL API, retries brief failures, refuses obviously broken responses, removes managers' real names, and saves gzip-compressed JSON to a separate `data` branch.
-2. **Transform and test:** `dbt build` cleans the raw JSON into staging tables and two marts, running 52 data tests. A failing test stops everything downstream of it.
+2. **Transform and test:** `dbt build` cleans the raw JSON into staging tables and three marts, running 52 data tests. A failing test stops everything downstream of it.
 3. **Publish:** only when every test passes, the marts are exported as Parquet for the app. Raw data is always kept, so a bad day can be investigated and replayed.
 
 ![dbt lineage graph](docs/lineage.png)

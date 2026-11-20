@@ -86,7 +86,7 @@ models:
         data_type: bigint
         data_tests:
           - not_null
-      - name: mart_top_half_weeks
+  - name: mart_top_half_weeks
     description: "One row per manager: finished gameweeks scored above the league's median (after hits), and the longest and current runs of them."
     config:
       contract:
