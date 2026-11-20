@@ -29,13 +29,13 @@ flowchart LR
     API["FPL API<br/>undocumented, public"] -->|daily, GitHub Actions| ING["ingest.py<br/>retries, guards,<br/>strips real names"]
     ING --> RAW[("data branch<br/>raw snapshots, gzip JSON")]
     RAW --> STG["dbt staging<br/>7 models"]
-    STG -->|42 tests gate every step| MART["dbt marts<br/>league summary,<br/>captain decisions"]
+    STG -->|52 tests gate every step| MART["dbt marts<br/>league summary,<br/>captain decisions,<br/>top-half weeks"]
     MART -->|only if all tests pass| PUB[("data branch<br/>published Parquet")]
     PUB --> APP["Streamlit app<br/>live"]
 ```
 
 1. **Ingest:** every day a GitHub Actions workflow calls the FPL API, retries brief failures, refuses obviously broken responses, removes managers' real names, and saves gzip-compressed JSON to a separate `data` branch.
-2. **Transform and test:** `dbt build` cleans the raw JSON into staging tables and two marts, running 42 data tests. A failing test stops everything downstream of it.
+2. **Transform and test:** `dbt build` cleans the raw JSON into staging tables and two marts, running 52 data tests. A failing test stops everything downstream of it.
 3. **Publish:** only when every test passes, the marts are exported as Parquet for the app. Raw data is always kept, so a bad day can be investigated and replayed.
 
 ![dbt lineage graph](docs/lineage.png)
@@ -50,12 +50,14 @@ flowchart LR
 | `assert_picks_complete` | A manager's gameweek missing from the picks, which would flatter their totals |
 | `assert_picks_shape` | A squad that isn't 15 players, 11 starters and one captain |
 | `assert_final_gameweeks_loaded` | FPL marking a gameweek final while its player points were never downloaded |
+| `assert_top_half_matches_head_to_head` | A manager's top-half weeks disagreeing with a separate count of the weeks they outscored more than half the league |
+| `assert_top_half_runs_valid` | Counts that contradict each other, like a longest run longer than all top-half weeks |
 | `assert_players_present` | An empty or broken snapshot saved as a normal day |
 | `assert_player_count_stable` | More than 5% of players appearing or disappearing overnight |
 | `assert_snapshots_fresh` | Data silently ceasing to arrive |
 | `assert_prices_in_range`, `assert_ownership_valid` | Unit and type errors (prices in tenths, numbers stored as text) |
 | Built-in `unique`, `not_null`, `accepted_values`, `relationships` | Duplicates, blanks, unknown codes, broken links between tables |
-| Model contracts on both marts | The app's input changing column names or types |
+| Model contracts on all three marts | The app's input changing column names or types |
 
 ## Design decisions
 
