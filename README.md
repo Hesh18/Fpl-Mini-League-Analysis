@@ -22,6 +22,11 @@ An automated, tested data pipeline that snapshots the Fantasy Premier League API
 
 ![The Top half tab](docs/top_half.png)
 
+
+**Players tab:** how often each player beat the middle score of his own position, ranked within each position, plus his best single game.
+
+![The Players tab](docs/players.png)
+
 ## Why I built this
 
 I love Fantasy Premier League. My friends and I have played every season since 2015/16, and I finished in the top 1% in 2024/25. We've always relied on third-party apps, so I decided to build our own. I wanted to learn how to connect to APIs, run an automated pipeline on free infrastructure, and connect several tools into one pipeline and an app that’s both useful and fun for my league.
@@ -33,7 +38,7 @@ flowchart LR
     API["FPL API<br/>undocumented, public"] -->|daily, GitHub Actions| ING["ingest.py<br/>retries, guards,<br/>strips real names"]
     ING --> RAW[("data branch<br/>raw snapshots, gzip JSON")]
     RAW --> STG["dbt staging<br/>7 models"]
-    STG -->|64 tests gate every step| MART["dbt marts<br/>league summary,<br/>captain decisions,<br/>top-half weekss,<br/>player consistency"]
+    STG -->|64 tests gate every step| MART["dbt marts<br/>league summary,<br/>captain decisions,<br/>top-half weeks,<br/>player consistency"]
     MART -->|only if all tests pass| PUB[("data branch<br/>published Parquet")]
     PUB --> APP["Streamlit app<br/>live"]
 ```
@@ -90,6 +95,10 @@ the captain. So the simple method said 8 points were lost when the real answer i
 ### 7. Finished gameweeks are downloaded once
 
 Player prices change every day, so I save them every day. A finished gameweek's picks and points never change, so downloading them again daily would waste around 150 API calls a day, and more each week, on data I already have. Instead, the pipeline downloads each manager's picks once, as soon as FPL marks the gameweek final, and skips any file it already has. A normal day makes no extra calls, and if a run fails halfway it picks up where it stopped next time. The weakness: if FPL corrects a score after marking the gameweek final, my saved file is out of date. The reconciliation test would catch it and stop anything being published, and the fix is to delete that file so it downloads again.
+
+### 8. Players are compared with their own position
+
+Points per game hides how a player gets his points. Muharemović and Bruno Fernandes average 5.6 and 5.0 points per game, but Muharemović beat his position's middle score in 8 of 10 games and Bruno in only 2 of 9, because nearly all of Bruno's points came from two big hauls. My first formula didn't work: it gave 82 of 340 players a negative score and favoured defenders, so I replaced it. A good game now means scoring more than the middle score of players in the same position who played at least 60 minutes, because 60 minutes is when a player earns his full appearance points and, for defenders and goalkeepers, clean sheet points. Players are ranked within their position, because each position scores differently and defenders in a strong defence beat their median together, so one combined list would be mostly defenders. A player is only ranked once he has full games in at least 40% of finished gameweeks, because a fixed number like 4 would mean less and less as the season goes on.
 
 ## What's next
 - A test that fails if a real name ever appears in a raw league file
