@@ -25,6 +25,7 @@ try:
     summary = load_table("mart_league_summary").sort_values("league_rank")
     captain = load_table("mart_captain_decisions")
     top_half = load_table("mart_top_half_weeks")
+    players = load_table("mart_player_consistency")
 except Exception:
     st.error("Couldn't load the league data right now. Try again in a few minutes.")
     st.stop()
@@ -39,7 +40,7 @@ if gameweek_final:
 else:
     st.caption(f"Gameweek {gameweek} in progress, points so far · data as of {as_of:%d %b %Y} · updates daily")
 
-league_tab, captain_tab, top_half_tab = st.tabs(["League", "Captaincy", "Top half"])
+league_tab, captain_tab, top_half_tab, players_tab = st.tabs(["League", "Captaincy", "Top half", "Players"])
 
 with league_tab:
     leader = summary.iloc[0]
@@ -320,6 +321,42 @@ with top_half_tab:
     st.caption(
         "Counted out of the weeks each manager has played, so late joiners aren't marked down. "
         "A run is top-half weeks in a row; the current run is the one still going."
+    )
+
+with players_tab:
+    st.caption(
+        f"Finished gameweeks only: 1 to {captain['gameweek'].max()}. "
+        "A good game means a player scored more than the middle score of everyone in his position who played 60+ minutes that week."
+    )
+    POSITIONS = {"Goalkeepers": "GKP", "Defenders": "DEF", "Midfielders": "MID", "Forwards": "FWD"}
+    position_name = st.radio("Position", list(POSITIONS), index=2, horizontal=True)
+    in_position = players["position"] == POSITIONS[position_name]
+
+    shown = players.loc[in_position & players["is_ranked"]].copy()
+    shown = shown.sort_values(["good_game_share", "full_games"], ascending=False)
+    shown["record"] = shown["good_games"].astype(str) + " of " + shown["full_games"].astype(str)
+    shown["share_pct"] = (100 * shown["good_game_share"]).round(0)
+
+    st.dataframe(
+        shown,
+        hide_index=True,
+        width="stretch",
+        height=420,
+        column_order=["player_name", "team_name", "price_m", "record", "share_pct", "best_game"],
+        column_config={
+            "player_name": st.column_config.TextColumn("Player"),
+            "team_name": st.column_config.TextColumn("Team"),
+            "price_m": st.column_config.NumberColumn("Price", format="£%.1fm"),
+            "record": st.column_config.TextColumn("Good games"),
+            "share_pct": st.column_config.NumberColumn("Share", format="%d%%"),
+            "best_game": st.column_config.NumberColumn("Best game"),
+        },
+    )
+    left_out = int((in_position & ~players["is_ranked"]).sum())
+    st.caption(
+        f"Only players with 60+ minutes in at least 40% of finished gameweeks are ranked; "
+        f"{left_out} {position_name.lower()} haven't played enough yet. "
+        "Best game is his highest single score: steady players suit transfers, big hauls suit the captaincy."
     )
 
 st.divider()
