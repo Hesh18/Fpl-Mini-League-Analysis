@@ -121,3 +121,50 @@ models:
         data_type: bigint
         data_tests:
           - not_null
+  - name: mart_player_consistency
+    description: "One row per player with at least one 60-minute game: how often he scored above the median of his position, his best game, and whether he has enough games to be ranked."
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: player_id
+        data_type: bigint
+        data_tests:
+          - unique
+          - not_null
+      - name: player_name
+        data_type: varchar
+        data_tests:
+          - not_null
+      - name: team_name
+        data_type: varchar
+        data_tests:
+          - not_null
+      - name: position
+        data_type: varchar
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["GKP", "DEF", "MID", "FWD"]
+      - name: price_m
+        data_type: double
+      - name: full_games
+        data_type: bigint
+        data_tests:
+          - not_null
+      - name: good_games
+        data_type: bigint
+        data_tests:
+          - not_null
+      - name: good_game_share
+        data_type: double
+        data_tests:
+          - not_null
+      - name: best_game
+        data_type: bigint
+        data_tests:
+          - not_null
+      - name: is_ranked
+        data_type: boolean
+        data_tests:
+          - not_null
